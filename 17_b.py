@@ -1,6 +1,9 @@
 from copy import copy, deepcopy
 
 file = '17_in.txt';
+stop = 1000000000000;
+
+round = [];
 
 input = [];
 with open(file) as f:
@@ -8,6 +11,7 @@ with open(file) as f:
     for c in l.strip():
       input.append(c);
 
+seen = [];
 map = [];
 map_floor = [];
 map_space = [];
@@ -67,7 +71,6 @@ def print_falling():
   print();
 
 
-print(input);
 
 rocks = ['-','+','l','|','x'];
 this_rock = -1;
@@ -78,14 +81,20 @@ ex = 0;
 idx = -1;
 rock_count = 0;
 
+periodic = '';
+p_count = 0;
+p_high = 0;
+delta_count = 0;
+delta_high = 0;
+
 while ex == 0:
   this_rock += 1;
   if this_rock == len(rocks):
     this_rock = 0;
 
   # NEW ROCK
-  if rock_count >= 2022:
-    print("FINISHED!", str(highest_point));
+  if rock_count >= stop:
+    print("PART A: ", str(highest_point));
     exit();
 
   # EXTEND MAP
@@ -106,18 +115,59 @@ while ex == 0:
   x = 3;
   y = highest_point+4;
 
-  print("START ROCK ",str(rock_count), "  highest = ", str(highest_point));
+  #print("START ROCK ",str(rock_count), "  highest = ", str(highest_point));
   #print_falling();
 
 
   falling = 1;
+  not_moved_yet = 1;
   while falling == 1:
     idx += 1;
     if idx == len(input):
       idx = 0;
 
+
+    if not_moved_yet == 1:
+      state = '-' + str(this_rock) + '+' + str(idx);
+      if periodic == '':
+        if state in seen:
+          print("FIRST PERIODIC REPEAT at rock count ", rock_count, "high=", highest_point);
+          p_count = rock_count;
+          p_high = highest_point;
+          periodic = state;
+        else:
+          seen.append(state);
+      else:
+        if delta_count == 0:
+          round.append(highest_point - p_high);
+        if state == periodic and delta_count == 0:
+          print("PERIODIC REPEAT at rock count ", rock_count, "high=", highest_point);
+          delta_count = rock_count - p_count;
+          delta_high = highest_point - p_high;
+          print("  delta count: ", str(delta_count));
+          print("  delta height: ", str(delta_high));
+          p_count = rock_count;
+          p_high = highest_point;
+
+          remaining_whole_rounds = ( stop - rock_count ) // delta_count;
+          rock_count += remaining_whole_rounds*delta_count;
+          highest_point += remaining_whole_rounds*delta_high;
+
+          leftover = stop - rock_count;
+          highest_point += round[leftover]
+
+          print("PART B: ", highest_point);
+          exit();
+
+          
+
+ 
+    #if this_rock == 0 and idx == 0 and not_moved_yet == 1:
+    #  print("PERIODIC REPEAT at rock count ", rock_count);
+
+    not_moved_yet = 0;
     # MOVE SIDEWAYS
-    print(input[idx], '     ', str(x));
+    #print(input[idx], '     ', str(x));
     if input[idx] == '>':
       if rocks[this_rock] == '-':
         if map[y][x+4]=='.':
@@ -171,7 +221,7 @@ while ex == 0:
         y -= 1;
       else:
         falling = 0;
-        print("COME TO REST AT X=", str(x));
+        #print("COME TO REST AT X=", str(x));
         map[y+1][x] = '#';
         map[y][x+1] = '#';
         map[y+1][x+1] = '#';
@@ -222,7 +272,7 @@ while ex == 0:
     #print_falling();
 
 
-  print("ROCK ", rock_count, "   ", rocks[this_rock] );
+  #print("ROCK ", rock_count, "   ", rocks[this_rock] );
 
   #for r in range(len(map)-1, -1, -1):
   #  for c in map[r]:
