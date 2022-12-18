@@ -21,10 +21,6 @@ for i in input:
   if i[2] > max_z:
     max_z = i[2];
 
-print(max_x);
-print(max_y);
-print(max_z);
-
 map = [];
 row = [];
 for z in range(max_z+5):
@@ -70,7 +66,6 @@ print("PART A: ", faces);
 # PART B
 
 
-print(map[3][3][6]);
 
 
 
@@ -108,7 +103,6 @@ while changed == 1:
 
 
 
-print(map[3][3][6]);
 
 
 
@@ -124,7 +118,7 @@ for x in range(max_x+1):
         void+=1;
         map[x][y][z] = 1;
 
-print("Voids: ", void);
+#print("Voids: ", void);
 
 for x in range(max_x+1):
   for y in range(max_y+1):
