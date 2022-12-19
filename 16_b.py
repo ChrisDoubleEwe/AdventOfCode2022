@@ -9,6 +9,9 @@ state = {};
 time_state = {};
 max_pressure = 0;
 max_history = [];
+best5 = 0;
+best10 = 0;
+best20 = 0;
 
 with open(file) as f:
   for l in f:
@@ -35,22 +38,49 @@ with open(file) as f:
 
 pressure = 0;
 
-def move(start, m, v, p, history):
+def move(start, e, m, v, p, history):
+  estart = e;
   global state;
   global time_state;
   global max_history;
   global flow;
   global tun;
   global max_pressure;
+  global best5;
+  global best10;
+  global best20;
 
   m += 1;
 
+  if m == 5 and p > best5:
+    best5 = p;
+    print("5: ", best5, " 10: ", best10, " 20 ", best20);
+  if m == 10 and p > best10:
+    best10 = p;
+    print("5: ", best5, " 10: ", best10, " 20 ", best20);
+  if m == 20 and p > best20:
+    best20 = p;
+    print("5: ", best5, " 10: ", best10, " 20 ", best20);
+
+
+  #5:  0  10:  960  20  1805
+  #5:  220  10:  1185  20  1934
+  #5:  496  10:  1382  20  2058
+
+
+
+  if m > 5 and p < 200:
+    return;
+  if m > 10 and p < 1000:
+    return;
+  if m > 20 and p < 1700:
+    return;
 
 
   # Add flow for all open valves
   #print("MOVING, m=",m);
-  this_state = '-' + str(m) + '+' + start + 'xx' +  '....';
-  #this_state = '-' + start + '....';
+  this_state = '-' + str(m) + '+' + start + 'xx' + e  +  '....';
+  #this_state = '-' + start + 'xx' + e  +  '....';
 
 
   current_flow_rate = 0;
@@ -61,7 +91,6 @@ def move(start, m, v, p, history):
       current_flow_rate += flow[z];
       this_state += '-' + str(z) + '-';
   this_state += ':::' + str(current_flow_rate);
-  p += current_flow_rate;
   history.append('MINUTE ' + str(m));
   history.append('    valves open: ' + open_valves + ' ; pressure release: ' + str(current_flow_rate));
 
@@ -69,7 +98,6 @@ def move(start, m, v, p, history):
   # Have we been here before, with a better flow
 
   if this_state in state.keys():
-    abc = 1;
     if m > time_state[this_state] and p < state[this_state]:
       return;
 
@@ -82,7 +110,7 @@ def move(start, m, v, p, history):
     state[this_state] = p;
     time_state[this_state] = m;
 
-  if m >= 30:
+  if m >= 26:
     if p > max_pressure:
       max_pressure = p;
       max_history = history.copy();
@@ -100,50 +128,82 @@ def move(start, m, v, p, history):
 
   this_m = m;
 
-  for me in ['valve', 'move']:
-    for ele in ['valve', 'move']
-      if me == 'valve' and ele == 'valve':
+  history.append('== Minute ' + str(this_m) + ' ==');
+
+  me_vals = ['move'];
+  el_vals = ['move'];
+  if v[start] == 0 and this_m < 25 and flow[start] > 0:
+    me_vals.append('valve');
+  if v[estart] == 0 and this_m < 25 and flow[estart]>0:
+    el_vals.append('valve');
+
+
+
+  old_p = p;
+  history.append("   PRESSURE: " + str(p));
+
+  for me in me_vals:
+    for ele in el_vals:
+      p = old_p;
+
+      if me == 'valve' and ele == 'valve' and start != estart:
+        this_history = history.copy();
+        this_history.append('You open valve ' + start + ' for ' + str(flow[start] * (26-m)));
+        this_history.append('Elephant opens valve ' + estart + ' for ' + str(flow[estart] * (26-m)));
         this_v = v.copy();
-        this_v[start] = 1;
-        this_v[estart] = 1;
-        move(start, estart, this_m, this_v.copy(), p, history.copy());
-      if me == 'valve' and ele = 'move':
-        this_v = v.copy();
-        this_v[start] = 1;
-        for t in tun[estart]:
-          move(start, t, this_m, this_v.copy(), p, history.copy());
-      if me == 'move' and ele = 'valve':
-        this_v = v.copy();
-        this_v[estart] = 1;
-        for t in tun[start]:
-          move(t, estart, this_m, v.copy(), p, history.copy());
-      if me == 'move' and ele = 'move':
-        for e in tun[estart]:
+        if v[start] == 0 and v[estart] == 0 and this_m < 25 and flow[start] > 0 and flow[estart]>0:
+          this_v[start] = 1;
+          p = old_p;
+          p += flow[start] * (26-m);
+          p += flow[estart] * (26-m);
+          this_v[estart] = 1;
+          move(start, estart, this_m, this_v.copy(), p, this_history.copy());
+      if me == 'valve' and ele == 'move':
+        if v[start] == 0 and this_m < 25 and flow[start] > 0:
+          this_history = history.copy();
+          this_history.append('You open valve ' + start + ' for ' + str(flow[start] * (26-m)));
+          this_v = v.copy();
+          this_v[start] = 1;
+          p = old_p;
+
+          p += flow[start] * (26-m);
+
+          for t in tun[estart]:
+            new_history = this_history.copy();
+            new_history.append('Elephant moves to ' + str(t));
+            move(start, t, this_m, this_v.copy(), p, new_history.copy());
+      if me == 'move' and ele == 'valve':
+        if v[estart] == 0 and this_m < 25 and flow[estart]>0:
+          this_history = history.copy();
+          this_history.append('Elephant opens valve ' + estart + ' for ' + str(flow[estart] * (26-m)));
+          p = old_p;
+
+          p += flow[estart] * (26-m);
+
+          this_v = v.copy();
+          this_v[estart] = 1;
           for t in tun[start]:
-            move(t, e, this_m, v.copy(), p, history.copy());
-
-
-
-  # In one scenario, open valve if it is closed
-  this_m = m;
-  if v[start] == 0 and this_m < 29 and flow[start] > 0:
-    v[start] = 1;
-    history.append('Minute ' + str(this_m) +': You: Turn on valve' + start + ' for a flow of ' + str(flow[start]));
-    move(start, this_m, v.copy(), p, history.copy());
-
-  # In the other scenario, don't open valve, and move
-  for t in tun[start]:
-    this_history = old_history.copy();
-    this_history.append('Minute ' + str(old_m) + ': Move to ' + str(t));
-    move(t, old_m, old_v.copy(), old_p, this_history.copy());
+            new_history = this_history.copy();
+            new_history.append('You move to ' + str(t));
+            move(t, estart, this_m, this_v.copy(), p, new_history.copy());
+      if me == 'move' and ele == 'move':
+        this_history = history.copy();
+        for e in tun[estart]:
+          new_history = this_history.copy();
+          new_history.append('Elephant moves to ' + str(e));
+          for t in tun[start]:
+            new_new_history = new_history.copy();
+            new_new_history.append('You move to ' + str(t));
+            move(t, e, this_m, v.copy(), p, new_new_history.copy());
 
 
 
 
-move('AA', 0, valve.copy(), pressure, []);
+move('AA', 'AA', 0, valve.copy(), pressure, []);
 print("MAX PRESSURE", max_pressure);
 print("Best path:")
 print('-----------');
 for h in max_history:
   print(h);
+print("PART B", max_pressure);
 

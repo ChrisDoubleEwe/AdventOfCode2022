@@ -1,0 +1,62 @@
+Best path:
+-----------
+MINUTE 1
+  0    valves open:  AA FF GG II ; pressure release: 0
+== Minute 1 ==
+Elephant moves to DD
+You move to II
+MINUTE 2
+  0    valves open:  AA FF GG II ; pressure release: 0
+== Minute 2 ==
+Elephant opens valve DD
+You move to JJ
+MINUTE 3
+  0    valves open:  AA DD FF GG II ; pressure release: 20
+== Minute 3 ==
+You open valve JJ
+Elephant moves to EE
+MINUTE 4
+  0    valves open:  AA DD FF GG II JJ ; pressure release: 41
+== Minute 4 ==
+Elephant moves to FF
+You move to II
+MINUTE 5
+  0    valves open:  AA DD FF GG II JJ ; pressure release: 41
+== Minute 5 ==
+Elephant moves to GG
+You move to AA
+MINUTE 6
+  0    valves open:  AA DD FF GG II JJ ; pressure release: 41
+== Minute 6 ==
+Elephant moves to HH
+You move to BB
+MINUTE 7
+  0    valves open:  AA DD FF GG II JJ ; pressure release: 41
+== Minute 7 ==
+You open valve BB
+Elephant opens valve HH
+MINUTE 8
+  0    valves open:  AA BB DD FF GG HH II JJ ; pressure release: 76
+== Minute 8 ==
+Elephant moves to GG
+You move to CC
+MINUTE 9
+  0    valves open:  AA BB DD FF GG HH II JJ ; pressure release: 76
+== Minute 9 ==
+You open valve CC
+Elephant moves to FF
+MINUTE 10
+  0    valves open:  AA BB CC DD FF GG HH II JJ ; pressure release: 78
+== Minute 10 ==
+Elephant moves to EE
+You move to DD
+MINUTE 11
+  0    valves open:  AA BB CC DD FF GG HH II JJ ; pressure release: 78
+== Minute 11 ==
+Elephant opens valve EE
+You move to CC
+MINUTE 12
+  1    valves open:  AA BB CC DD EE FF GG HH II JJ ; pressure release: 81
+ALL VALVES OPEN
+PART B 1707
+
