@@ -1,7 +1,7 @@
 from copy import copy, deepcopy
 from collections import deque
 
-file = '23_test.txt';
+file = '23_in.txt';
 
 
 def print_map():
@@ -12,7 +12,7 @@ def print_map():
     print();
 
 map = [];
-map_increase = 10;
+map_increase = 100;
 origin_x = int(map_increase/2);
 origin_y = origin_x;
 
@@ -24,11 +24,10 @@ with open(file) as f:
       max_x = len(l);
     max_y += 1;
 
-print(max_x, " ", max_y);
 
-for y in range(max_x+10):
+for y in range(max_x+map_increase):
   this_row = [];
-  for x in range(max_y+10):
+  for x in range(max_y+map_increase):
     this_row.append('.');
   map.append(this_row.copy());
 
@@ -50,13 +49,15 @@ with open(file) as f:
 
 
 
-print_map();
 dirs = ['N','S','W','E'];
 
 
 did_anything_move = 1;
 
+round = 0;
 while did_anything_move == 1:
+  round += 1;
+  print("== Round ", round);
   did_anything_move = 0;
   proposals = [];
 
@@ -78,15 +79,13 @@ while did_anything_move == 1:
             pair = [];
             pair.append(elf_y-1);
             pair.append(elf_x);
-            print('Appending ', pair);
             proposals.append(pair.copy());
             done = 1;
         elif d == 'S' and done == 0:
-          if map[elf_y+1][elf_x+1] == '.' and map[elf_y+1][elf_x] == '.' and map[elf_y+1][elf_x+1] == '.':
+          if map[elf_y+1][elf_x-1] == '.' and map[elf_y+1][elf_x] == '.' and map[elf_y+1][elf_x+1] == '.':
             pair = [];
             pair.append(elf_y+1);
             pair.append(elf_x);
-            print('Appending ', pair);
             proposals.append(pair.copy());
             done = 1;
         elif d == 'E' and done == 0:
@@ -94,7 +93,6 @@ while did_anything_move == 1:
             pair = [];
             pair.append(elf_y);
             pair.append(elf_x+1);
-            print('Appending ', pair);
             proposals.append(pair.copy());
             done = 1;
         elif d == 'W' and done == 0:
@@ -102,7 +100,6 @@ while did_anything_move == 1:
             pair = [];
             pair.append(elf_y);
             pair.append(elf_x-1);
-            print('Appending ', pair);
             proposals.append(pair.copy());
             done = 1;
       if done == 0:
@@ -115,9 +112,7 @@ while did_anything_move == 1:
   
   can_moves = [];
 
-  print(proposals);
   for idx in range(len(elves)):
-    print(idx);
     this_proposal = proposals[idx];
     this_elf = elves[idx];
 
@@ -134,7 +129,6 @@ while did_anything_move == 1:
     if can_moves[idx] == 1:
       this_elf = elves[idx];
       this_proposal = proposals[idx];
-      print('Moving from ', this_elf, ' to ', this_proposal);
       map[this_elf[0]][this_elf[1]] = '.';
       map[this_proposal[0]][this_proposal[1]] = '#';
       elves[idx] = deepcopy(this_proposal);
@@ -149,10 +143,37 @@ while did_anything_move == 1:
     new_dirs.append(dirs[i]);
   new_dirs.append(pop_dir);
   dirs = new_dirs.copy();
-  print(dirs);
 
-  print_map();
 
+
+  if round == 10:
+    min_x = 9999999999;
+    min_y = 9999999999;
+    max_x = 0;
+    max_y = 0;
+    for elf in elves:
+      if elf[0] < min_y:
+        min_y = elf[0];
+      if elf[0] > max_y:
+        max_y = elf[0];
+      if elf[1] < min_x:
+        min_x = elf[1];
+      if elf[1] > max_x:
+        max_x = elf[1];
+
+    max_x+=1;
+    max_y+=1;
+    #print("MAX X: ", max_x);
+    #print("MAX Y: ", max_y);
+    #print("MIN X: ", min_y);
+    #print("MIN X: ", min_y);
+    #print("squares: ", ( max_x - min_x ) * ( max_y - min_y));
+    #print('elves: ', len(elves));
+
+    num_squares = (( max_x - min_x ) * ( max_y - min_y)) - len(elves);
+    print("PART A: ", num_squares);
+
+print("PART B ", round);
 
 
 
