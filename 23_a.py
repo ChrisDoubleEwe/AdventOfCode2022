@@ -12,7 +12,7 @@ def print_map():
     print();
 
 map = [];
-map_increase = 100;
+map_increase = 250;
 origin_x = int(map_increase/2);
 origin_y = origin_x;
 
