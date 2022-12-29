@@ -1,132 +1,124 @@
 from copy import copy, deepcopy
 from collections import deque
 
-#file = '22_in.txt';
-file = '22_test.txt';
+file = '22_in.txt';
 
-if file == '22_in.txt':
-  cube_size = 50
-else:
-  cube_size = 4;
+edges = [];
+# Page 0
+edges.append([[5, 'x','0', 1], [1, 'y', '0', 1], [2, '0', 'x', 2], [3, 'invy', '0', 1]]);
 
+# Page 1
+edges.append([[5, '50','x', 0], [4, 'invy', '50', 3], [2, 'x', '50', 3], [0, 'y', '50', 3]]);
+
+# Page 2
+edges.append([[0, '50','x', 0], [1, '50', 'y', 0], [4, '0', 'x', 2], [3, '0', 'y', 2]]);
+
+# Page 3
+edges.append([[2, 'x','0', 1], [4, 'y', '0', 1], [5, '0', 'x', 2], [0, 'invy', '0', 1]]);
+
+# Page 4
+edges.append([[2, '50','x', 0], [1, 'invy', '50', 3], [5, 'x', '50', 3], [3, 'y', '50', 3]]);
+
+# Page 5
+edges.append([[3, '50','x', 0], [4, '50', 'y', 0], [1, '0', 'x', 2], [0, '0', 'y', 2]]);
+
+
+# Possible X values:
+#  0
+#  x
+#  50
+#  y
+
+# Possible Y values:
+#  x
+#  50
+#  y
+#  invy
+#  0
+
+ 
 
 map = [];
-face = [];
-
 input = [];
+max_line_length = 0;
+faces = [];
+faces.append([]);
+faces.append([]);
+faces.append([]);
 
-input_x = 0;
+
+get_input = 0;
 with open(file) as f:
+  face_factor = 0;
+  current_line = -1;
   for l in f:
-    l = l.replace("\n", "");
-    input.append(l);
-    if len(l) > input_x:
-      input_x = len(l);
-
-input_y = len(input)-2;
-print("input_y = ", input_y, " ; input_x=", input_x);
-
-
-
-row = [];
-for c in range(cube_size):
-  row.append(' ');
-blank_row = row.copy();
-
-for r in range(cube_size):
-  face.append(blank_row.copy());
-
-cube = [];
-
-for fy in range(4):
-  cube_row = [];
-  for fx in range(4):
-    if fx*cube_size >= input_x:
-      continue;
-    if fy*cube_size >= input_y:
+    if l.strip() == '':
+      get_input = 1;
       continue;
 
-    cube_row.append(deepcopy(face));
-  cube.append(deepcopy(cube_row));
+    if get_input == 1:
+      input = l.strip();
+      break;
+      
+    current_line += 1;
 
-for f in range(6):
-  map.append(deepcopy(face));
+    for i in range(0, 160):
+      l += ' ';
 
-for fx in range(4):
-  for fy in range(4):
-    if fx*cube_size >= input_x:
-      continue;
-    if fy*cube_size >= input_y:
-      continue;
-
-    this_face = deepcopy(face);
-    for y in range(cube_size):
-      for x in range(cube_size):
-        print("y= ", y, " x= ", x, " fy=", fy, " fx=", fx, " input_y=", (fy*cube_size)+y, " input_x=", (fx*cube_size)+x);
-        this_face[y][x] = input[(fy*cube_size)+y][(fx*cube_size)+x];
-      cube[fy][fx] = deepcopy(this_face);
- 
-        
-exit();
+    l1 = list(l[0:50]);
+    l2 = list(l[50:100]);
+    l3 = list(l[100:150]);
 
 
-doing_map = 1;
+    faces[(face_factor*3)+0].append(l1);
+    faces[(face_factor*3)+1].append(l2);
+    faces[(face_factor*3)+2].append(l3);
+   
+    if current_line == 49:
+      current_line = -1;
+      face_factor += 1;
+      faces.append([]);
+      faces.append([]);
+      faces.append([]);
 
-directions = '';
 
-x = 0;
-y = 0;
-for r in input:
-  if r.strip() == '':
-    doing_map = 0;
-  if doing_map == 1:
-    x = 0;
-    for c in r:
-      map[y][x] = c;
-      x += 1;
-    y += 1;
-  if doing_map == 0:
-    directions = r;
 
-#for r in map:
-#  for c in r:
-#    print(c, end = '');
-#  print('');
+#input = '10R47R7L35L4R34R29L20L45L43R33L46R31R10L1L6R7R25R45L46R12R35';
 
+real_faces = [];
+# Get rid of empty faces
+
+face_count = -1;
+for f in faces:
+  face_count += 1;
+  for l in f:
+    if '.' in l:
+      real_faces.append(deepcopy(f));
+      break;
+
+
+faces = deepcopy(real_faces);
+
+directions = input;
+
+
+me_f = 0;
 me_y = 0;
 me_x = -1;
-for c in map[0]:
+for c in faces[me_f][me_y][me_x]:
   me_x += 1;
   if c == '.':
     break;
 
-me_dir = 0; # RIGHT
+me_dir = 1; # RIGHT
 
-#ADD BLANK BORDER AROUND MAP
-me_x += 1;
-me_y+=1;
-new_map = [];
-new_map.append(blank_row);
-for i in map:
-  new_map.append(i.copy());
-new_map.append(blank_row);
-
-new_new_map = [];
-for row in new_map:
-  new_row = [];
-  new_row.append(' ');
-  for c in row:
-    new_row.append(c);
-  new_row.append(' ');
-  new_new_map.append(new_row.copy());
-
-map = deepcopy(new_new_map);
 def print_map():
-  global map;
+  global faces;
+  global me_f;
   global me_x;
   global me_y;
-  print("ME_X: ", me_x, " , ME_Y:", me_y, " , DIR:", me_dir);
-  map_copy = deepcopy(map);
+  print("ME_F: ", me_f, " ; ME_X: ", me_x, " , ME_Y:", me_y, " , DIR:", me_dir);
+  map_copy = deepcopy(faces[me_f]);
   map_copy[me_y][me_x] = "*";
   for r in map_copy:
     for c in r:
@@ -134,79 +126,7 @@ def print_map():
     print('');
   print('');
 
-def move(d,m):
-  global map;
-  global me_x;
-  global me_y;
-  if d == 0:        # RIGHT
-    for i in range(m):
-      if me_x < max_line_length:
-        if map[me_y][me_x+1] == '.':
-          me_x+=1;
-        elif map[me_y][me_x+1] == '#':
-          nop = 1;
-        elif map[me_y][me_x+1] == ' ':
-          wrap_x = 0;
-          while map[me_y][wrap_x] == ' ':
-            wrap_x += 1;
-          if map[me_y][wrap_x] == '.':
-            me_x = wrap_x;
-          elif map[me_y][wrap_x] == '#':
-            nop = 1;
 
-  if d == 1:        # DOWN
-    for i in range(m):
-      if me_y <len(map)-1:
-        if map[me_y+1][me_x] == '.':
-          me_y+=1;
-        elif map[me_y+1][me_x] == '#':
-          nop = 1;
-        elif map[me_y+1][me_x] == ' ':
-          wrap_y = 0;
-          while map[wrap_y][me_x] == ' ':
-            wrap_y += 1;
-          if map[wrap_y][me_x] == '.':
-            me_y = wrap_y;
-          elif map[wrap_y][me_x] == '#':
-            nop = 1;
-
-  if d == 2:        # LEFT
-    for i in range(m):
-      if me_x > 0:
-        if map[me_y][me_x-1] == '.':
-          me_x-=1;
-        elif map[me_y][me_x-1] == '#':
-          nop = 1;
-        elif map[me_y][me_x-1] == ' ':
-          wrap_x = max_line_length-1;
-          while map[me_y][wrap_x] == ' ':
-            wrap_x -= 1;
-          if map[me_y][wrap_x] == '.':
-            me_x = wrap_x;
-          elif map[me_y][wrap_x] == '#':
-            nop = 1;
-
-  if d == 3:        # UP
-    for i in range(m):
-      if me_y > 0:
-        if map[me_y-1][me_x] == '.':
-          me_y-=1;
-        elif map[me_y-1][me_x] == '#':
-          nop = 1;
-        elif map[me_y-1][me_x] == ' ':
-          wrap_y = len(map)-1;
-          while map[wrap_y][me_x] == ' ':
-            wrap_y -= 1;
-          if map[wrap_y][me_x] == '.':
-            me_y = wrap_y;
-          elif map[wrap_y][me_x] == '#':
-            nop = 1;
-
-
-
-
-
-print(directions);
 
 dir_list = [];
 
@@ -227,18 +147,235 @@ if this_num != '':
   dir_list.append(int(this_num));
 
 
-#me_x = 9;
-#me_y = 12;
+def move(dir, dist):
+  global me_f;
+  global me_x;
+  global me_y;
+  global faces;
+  global me_dir;
+  
+  for i in range(dist):
+    next_d = dir;
+    next_f = me_f;
+    next_x = me_x;
+    next_y = me_y;
+
+    # MOVE RIGHT
+    if dir == 1:
+      if me_x == 49:
+        new_f = edges[me_f][dir][0]; 
+        y_mod = edges[me_f][dir][1]; 
+        x_mod = edges[me_f][dir][2];
+        new_d = edges[me_f][dir][3];
+        if x_mod == '0':
+          new_x = 0;
+        if x_mod == '50':
+          new_x = 49;
+        if x_mod == 'x':
+          new_x = me_x;
+        if x_mod == 'y':
+          new_x = me_y;
+        if y_mod == '0':
+          new_y = 0;
+        if y_mod == '50':
+          new_y = 49;
+        if y_mod == 'x':
+          new_y = me_x;
+        if y_mod == 'y':
+          new_y = me_y;
+        if y_mod == 'invy':
+          new_y = abs(49-me_y);
+        #print("new_f: ", new_f);
+        #print("new_y: ", new_y);
+        #print("new_x: ", new_x);
+
+        if faces[new_f][new_y][new_x] == '.':
+          next_f = new_f;
+          next_x = new_x;
+          next_y = new_y;
+          next_d = new_d;
+      else:
+        if faces[me_f][me_y][me_x+1] == '.':
+          next_x = me_x + 1;
+
+    # MOVE LEFT
+    if dir == 3:
+      if me_x == 0:
+        new_f = edges[me_f][dir][0];
+        y_mod = edges[me_f][dir][1];
+        x_mod = edges[me_f][dir][2];
+        new_d = edges[me_f][dir][3];
+        if x_mod == '0':
+          new_x = 0;
+        if x_mod == '50':
+          new_x = 49;
+        if x_mod == 'x':
+          new_x = me_x;
+        if x_mod == 'y':
+          new_x = me_y;
+        if y_mod == '0':
+          new_y = 0;
+        if y_mod == '50':
+          new_y = 49;
+        if y_mod == 'x':
+          new_y = me_x;
+        if y_mod == 'y':
+          new_y = me_y;
+        if y_mod == 'invy':
+          new_y = abs(49-me_y);
+        #print("new_f: ", new_f);
+        #print("new_y: ", new_y);
+        #print("new_x: ", new_x);
+        #print("new_d: ", new_d);
+
+
+        if faces[new_f][new_y][new_x] == '.':
+          next_f = new_f;
+          next_x = new_x;
+          next_y = new_y;
+          next_d = new_d;
+      else:
+        if faces[me_f][me_y][me_x-1] == '.':
+          next_x = me_x - 1;
+      
+    # MOVE UP
+    if dir == 0:
+      if me_y == 0:
+        new_f = edges[me_f][dir][0];
+        y_mod = edges[me_f][dir][1];
+        x_mod = edges[me_f][dir][2];
+        new_d = edges[me_f][dir][3];
+        if x_mod == '0':
+          new_x = 0;
+        if x_mod == '50':
+          new_x = 49;
+        if x_mod == 'x':
+          new_x = me_x;
+        if x_mod == 'y':
+          new_x = me_y;
+        if y_mod == '0':
+          new_y = 0;
+        if y_mod == '50':
+          new_y = 49;
+        if y_mod == 'x':
+          new_y = me_x;
+        if y_mod == 'y':
+          new_y = me_y;
+        if y_mod == 'invy':
+          new_y = abs(49-me_y);
+        #print("new_f: ", new_f);
+        #print("new_y: ", new_y);
+        #print("new_x: ", new_x);
+
+        if faces[new_f][new_y][new_x] == '.':
+          next_f = new_f;
+          next_x = new_x;
+          next_y = new_y;
+          next_d = new_d;
+      else:
+        if faces[me_f][me_y-1][me_x] == '.':
+          next_y = me_y - 1;
+
+    # MOVE DOWN
+    if dir == 2:
+      if me_y == 49:
+        new_f = edges[me_f][dir][0];
+        y_mod = edges[me_f][dir][1];
+        x_mod = edges[me_f][dir][2];
+        new_d = edges[me_f][dir][3];
+        if x_mod == '0':
+          new_x = 0;
+        if x_mod == '50':
+          new_x = 49;
+        if x_mod == 'x':
+          new_x = me_x;
+        if x_mod == 'y':
+          new_x = me_y;
+        if y_mod == '0':
+          new_y = 0;
+        if y_mod == '50':
+          new_y = 49;
+        if y_mod == 'x':
+          new_y = me_x;
+        if y_mod == 'y':
+          new_y = me_y;
+        if y_mod == 'invy':
+          new_y = abs(49-me_y);
+        #print("new_f: ", new_f);
+        #print("new_y: ", new_y);
+        #print("new_x: ", new_x);
+
+        if faces[new_f][new_y][new_x] == '.':
+          next_f = new_f;
+          next_x = new_x;
+          next_y = new_y;
+          next_d = new_d;
+      else:
+        if faces[me_f][me_y+1][me_x] == '.':
+          next_y = me_y + 1;
+
+    me_f = next_f;
+    me_x = next_x;
+    me_y = next_y;
+    dir = next_d;
+    me_dir = next_d;
+
+
+
+
+
+  
+
+#me_f = 1;
+#me_x = 49;
+#me_y = 44;
 #print_map();
 #move(1,1);
 #print_map();
 #exit();
 
+def abs_pos():
+  global me_f;
+  global me_y;
+  global me_x;
+
+  res = '(';
+  if me_f == 0:
+    result_y = me_y;
+    result_x = 50+me_x;
+  if me_f == 1:
+    result_y = me_y;
+    result_x = 100+me_x;
+  if me_f == 2:
+    result_y = 50+me_y;
+    result_x = 50+me_x;
+  if me_f == 3:
+    result_y = 100+me_y;
+    result_x = me_x;
+  if me_f == 4:
+    result_y = 100+me_y;
+    result_x = 50+me_x;
+  if me_f == 5:
+    result_y = 150+me_y;
+    result_x = me_x;
+  res += str(result_x);
+  res += ', ';
+  res += str(result_y);
+  res += ')';
+  return res;
+
+first = 1;
 for x in dir_list:
+  #if first == 0:
+    #print(abs_pos());
+    #print("me_f: ", me_f, "me_x: ", me_x, " me_y: ", me_y, " me_dir=", me_dir);
+
+  if first == 1:
+    first = 0;
   if isinstance(x, int):
     dist = x;
-    print("========================");
-    print("Moving ", dist, " in direction: ", me_dir);
+    #print("========================");
+    #print("Moving ", dist, " in direction: ", me_dir);
     move(me_dir, dist);
     #print_map();
   else:
@@ -246,20 +383,64 @@ for x in dir_list:
       me_dir += 1;
       if me_dir == 4:
         me_dir = 0;
-      print("Turning RIGHT, new direction = ", me_dir);
+      #print("Turning RIGHT, new direction = ", me_dir);
 
     if x == 'L':
       me_dir -= 1;
       if me_dir == -1:
         me_dir = 3;
-      print("Turning LEFT, new direction = ", me_dir);
+      #print("Turning LEFT, new direction = ", me_dir);
 
 
-me_x -= 1;
-me_y -= 1;
-print(me_x, " : ", me_y);
-result = ( me_y + 1 ) * 1000;
-result += (me_x + 1 ) * 4;
-result += me_dir;
+#me_x -= 1;
+#me_y -= 1;
+#print("me_f: ", me_f, "me_x: ", me_x, " me_y: ", me_y, "me_dir=", me_dir);
+#result = ( me_y + 1 ) * 1000;
+#result += (me_x + 1 ) * 4;
+#result += me_dir;
+#
+#print("PART A: ", result);
 
-print("PART A: ", result);
+
+# Map back to original coordinates
+#   01
+#   2
+#  34
+#  5
+
+if me_f == 0:
+  result_y = me_y;
+  result_x = 50+me_x;
+if me_f == 1:
+  result_y = me_y;
+  result_x = 100+me_x;
+if me_f == 2:
+  result_y = 50+me_y;
+  result_x = 50+me_x;
+if me_f == 3:
+  result_y = 100+me_y;
+  result_x = me_x;
+if me_f == 4:
+  result_y = 100+me_y;
+  result_x = 50+me_x;
+if me_f == 5:
+  result_y = 150+me_y;
+  result_x = me_x;
+
+result_x += 1;
+result_y += 1;
+
+#print("result_x: ", result_x, " result_y: ", result_y);
+result_dir = me_dir - 1;
+if result_dir == -1:
+  result_dir = 3;
+#print("result_dir: ", result_dir, " result_x: ", result_x, " result_y: ", result_y);
+
+partb = (1000 * result_y) + (4 * result_x) + result_dir;
+print("PART B: ", partb);
+
+
+
+
+
+
